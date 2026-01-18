@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "convex": {
+      "command": "npx",
+      "args": ["convex", "mcp", "start"]
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/camp-projects/hallwaychat"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
