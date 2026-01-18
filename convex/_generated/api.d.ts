@@ -8,9 +8,14 @@
  * @module
  */
 
+import type * as chapters from "../chapters.js";
 import type * as clips from "../clips.js";
 import type * as episodes from "../episodes.js";
+import type * as lib_transcriptParser from "../lib/transcriptParser.js";
+import type * as processingJobs from "../processingJobs.js";
+import type * as rss from "../rss.js";
 import type * as topics from "../topics.js";
+import type * as transcriptImport from "../transcriptImport.js";
 
 import type {
   ApiFromModules,
@@ -19,9 +24,14 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  chapters: typeof chapters;
   clips: typeof clips;
   episodes: typeof episodes;
+  "lib/transcriptParser": typeof lib_transcriptParser;
+  processingJobs: typeof processingJobs;
+  rss: typeof rss;
   topics: typeof topics;
+  transcriptImport: typeof transcriptImport;
 }>;
 
 /**
