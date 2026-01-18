@@ -36,7 +36,7 @@ export function normalizeSpeaker(name: string): string {
   // Check if it starts with or equals "nabeel" (handles "nabeel", "nabeel hyatt", etc.)
   if (lowered === "nabeel" || lowered.startsWith("nabeel ")) return "Nabeel";
   // Capitalize first letter for any other speaker (guests)
-  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  return lowered.charAt(0).toUpperCase() + lowered.slice(1);
 }
 
 // Extract speaker from text, returns speaker and cleaned text
@@ -62,9 +62,16 @@ function isSectionHeader(text: string): boolean {
   const trimmed = text.trim();
   // Skip lines that are just dashes
   if (/^-+$/.test(trimmed)) return true;
-  // Skip common section headers (short lines without speaker labels)
-  if (trimmed.length < 30 && !trimmed.includes(":") && !trimmed.includes(".")) {
-    // Likely a section header like "Cold Open", "Intro", etc.
+  // Skip known section headers
+  const knownHeaders = new Set([
+    "Cold Open",
+    "Intro",
+    "Introduction",
+    "Outro",
+    "Ad Break",
+    "Break",
+  ]);
+  if (knownHeaders.has(trimmed)) {
     return true;
   }
   return false;
@@ -147,8 +154,11 @@ export function parseTransistorTranscript(
     if (next) {
       endTime = next.seconds - 0.001; // Just before next segment starts
     } else {
-      // Last segment: use episode duration or default +30s
-      endTime = episodeDuration || current.seconds + 30;
+      // Last segment: use episode duration only if greater than current time, otherwise default +30s
+      endTime =
+        episodeDuration && episodeDuration > current.seconds
+          ? episodeDuration
+          : current.seconds + 30;
     }
 
     // Guard against zero or negative duration (repeated timestamps)

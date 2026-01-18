@@ -92,12 +92,16 @@ export const importFromURL = action({
         errors: errors.length > 0 ? errors : undefined,
       };
     } catch (error) {
-      // Mark job as failed
-      await ctx.runMutation(internal.processingJobs.updateStatus, {
-        jobId,
-        status: "failed",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      // Mark job as failed - wrap in try/catch to preserve original error
+      try {
+        await ctx.runMutation(internal.processingJobs.updateStatus, {
+          jobId,
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+        });
+      } catch {
+        // Ignore status update errors to preserve original error
+      }
       throw error;
     }
   },
@@ -117,6 +121,12 @@ export const insertSegments = internalMutation({
     ),
   },
   handler: async (ctx, { episodeId, segments }) => {
+    // Verify episode exists to prevent orphaned segments
+    const episode = await ctx.db.get(episodeId);
+    if (!episode) {
+      throw new Error(`Episode ${episodeId} not found`);
+    }
+
     for (const segment of segments) {
       await ctx.db.insert("transcriptSegments", {
         episodeId,
@@ -143,15 +153,17 @@ export const getSegmentCountInternal = internalQuery({
   },
 });
 
-// Get all segments for an episode
+// Get all segments for an episode, sorted by startTime
 export const getEpisodeSegments = query({
   args: { episodeId: v.id("episodes") },
   handler: async (ctx, { episodeId }) => {
-    return ctx.db
+    const segments = await ctx.db
       .query("transcriptSegments")
       .withIndex("by_episode", (q) => q.eq("episodeId", episodeId))
-      .order("asc")
       .collect();
+    // Sort by startTime since index doesn't guarantee time order
+    segments.sort((a, b) => a.startTime - b.startTime);
+    return segments;
   },
 });
 

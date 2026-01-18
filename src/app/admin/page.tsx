@@ -468,7 +468,7 @@ export default function AdminPage() {
                   Chapters: {selectedChaptersUrl}
                 </p>
               )}
-              {!selectedEpisode && (
+              {episodes !== undefined && !selectedEpisode && (
                 <p className="mt-2 text-sm text-amber-600">
                   Episode not found in database. Create it first before
                   importing.

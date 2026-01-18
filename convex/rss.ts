@@ -21,7 +21,8 @@ export interface RSSEpisode {
 function getTagContent(xml: string, tagName: string): string | null {
   // Handle namespaced tags like itunes:episode
   const escapedTag = tagName.replace(/:/g, "\\:");
-  const regex = new RegExp(`<${escapedTag}[^>]*>([^<]*)</${escapedTag}>`, "i");
+  // Use non-greedy capture to include HTML content until closing tag
+  const regex = new RegExp(`<${escapedTag}[^>]*>([\\s\\S]*?)</${escapedTag}>`, "i");
   const match = xml.match(regex);
   return match ? match[1].trim() : null;
 }
@@ -65,13 +66,19 @@ function parseItem(itemXml: string): RSSEpisode | null {
     if (durationStr.includes(":")) {
       // HH:MM:SS or MM:SS format
       const parts = durationStr.split(":").map((p) => parseInt(p, 10));
-      if (parts.length === 3) {
-        duration = parts[0] * 3600 + parts[1] * 60 + parts[2];
-      } else if (parts.length === 2) {
-        duration = parts[0] * 60 + parts[1];
+      // Guard against NaN from malformed duration strings
+      if (!parts.some((n) => Number.isNaN(n))) {
+        if (parts.length === 3) {
+          duration = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        } else if (parts.length === 2) {
+          duration = parts[0] * 60 + parts[1];
+        }
       }
     } else {
-      duration = parseInt(durationStr, 10);
+      const parsed = parseInt(durationStr, 10);
+      if (!Number.isNaN(parsed)) {
+        duration = parsed;
+      }
     }
   }
 
