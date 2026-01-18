@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Start Convex in the background
+npx convex dev &
+CONVEX_PID=$!
+
+# Give Convex a moment to start
+sleep 2
+
+# Start Next.js dev server
+npm run dev
+
+# When Next.js exits, kill Convex
+kill $CONVEX_PID 2>/dev/null
