@@ -2,6 +2,16 @@
 
 Semantic search platform for the Hallway Chat podcast. Lets founders search 39+ episodes by concept rather than browsing chronologically.
 
+## MCP Server Setup
+
+On first run, check if MCP servers are configured properly. If GitHub MCP fails, ask the user to set their `GITHUB_TOKEN` environment variable:
+
+```bash
+export GITHUB_TOKEN="ghp_xxxx"  # GitHub Personal Access Token
+```
+
+For Vercel MCP, remind user to run `/mcp` to authenticate via OAuth.
+
 ## Quick Context
 
 - **Frontend:** Next.js 14 (App Router) + TypeScript + Tailwind + shadcn/ui

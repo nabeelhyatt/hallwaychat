@@ -79,6 +79,34 @@ For the complete project specification, see **[docs/PROJECT_SPEC.md](docs/PROJEC
 - [ ] AI era badges for content dating
 - [ ] Dynamic OG images for sharing
 
+## AI Development Setup (Claude Code)
+
+This project is configured with MCP servers for enhanced AI assistance:
+
+| Server | Purpose | Setup Required |
+|--------|---------|----------------|
+| Convex | Database queries, schema info, function execution | Run `npx convex dev` first |
+| Vercel | Deployment logs, project management | OAuth via `/mcp` command |
+| Context7 | Up-to-date library docs | None (optional API key for higher limits) |
+| GitHub | PR/issue management | Set `GITHUB_TOKEN` env var + Docker |
+
+### Quick Start with Claude Code
+
+```bash
+# Install Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# Start the project
+npm run dev
+npx convex dev
+
+# Run Claude Code
+claude
+
+# Authenticate Vercel MCP (inside Claude Code)
+/mcp
+```
+
 ## License
 
 MIT
