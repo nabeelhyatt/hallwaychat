@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { parseTransistorTranscript } from "./lib/transcriptParser";
+import { validateTransistorUrl } from "./lib/urlValidator";
 
 // Return type for import action
 interface ImportResult {
@@ -47,7 +48,8 @@ export const importFromURL = action({
     });
 
     try {
-      // 3. Fetch transcript from Transistor URL
+      // 3. Validate URL and fetch transcript from Transistor
+      validateTransistorUrl(transcriptUrl);
       const response = await fetch(transcriptUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch transcript: ${response.status}`);

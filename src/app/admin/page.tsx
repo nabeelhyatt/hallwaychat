@@ -108,11 +108,10 @@ function ChapterStatus({
     setError(null);
 
     try {
-      const result = await importChapters({
+      await importChapters({
         episodeId,
         chaptersUrl,
       });
-      console.log("Chapter import result:", result);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Chapter import failed");
     } finally {
@@ -376,12 +375,11 @@ export default function AdminPage() {
     setError(null);
 
     try {
-      const result = await importFromURL({
+      await importFromURL({
         episodeId: selectedEpisode._id,
         transcriptUrl: selectedTranscriptUrl,
         episodeDuration: selectedDuration || undefined,
       });
-      console.log("Import result:", result);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import failed");
     } finally {

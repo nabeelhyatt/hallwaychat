@@ -1,7 +1,8 @@
-import { action, query, internalMutation, internalQuery } from "./_generated/server";
+import { action, query, mutation, internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { validateTransistorUrl } from "./lib/urlValidator";
 
 // Types for chapters.json from Transistor
 interface ChapterJSON {
@@ -56,7 +57,8 @@ export const importFromURL = action({
     });
 
     try {
-      // 3. Fetch chapters.json from Transistor
+      // 3. Validate URL and fetch chapters.json from Transistor
+      validateTransistorUrl(chaptersUrl);
       const response = await fetch(chaptersUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch chapters: ${response.status}`);
@@ -205,7 +207,7 @@ export const get = query({
 });
 
 // Delete all chapters for an episode (for re-import)
-export const deleteEpisodeChapters = internalMutation({
+export const deleteEpisodeChapters = mutation({
   args: { episodeId: v.id("episodes") },
   handler: async (ctx, { episodeId }) => {
     const chapters = await ctx.db
