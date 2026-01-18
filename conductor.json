@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "setup": "npm install",
+    "run": "./script/dev",
+    "archive": "rm -rf node_modules .next"
+  }
+}

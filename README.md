@@ -58,6 +58,17 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 └── public/              # Static assets
 ```
 
+## Documentation
+
+For the complete project specification, see **[docs/PROJECT_SPEC.md](docs/PROJECT_SPEC.md)**. It includes:
+
+- Product decisions and tech stack rationale
+- Full data model with Convex schema
+- Processing pipeline (transcript import → AI segmentation → embeddings)
+- Search algorithm and ranking formula
+- Page layouts and feature specifications
+- Implementation phases with verification plan
+
 ## Features (Planned)
 
 - [x] Homepage with search bar and featured clips
