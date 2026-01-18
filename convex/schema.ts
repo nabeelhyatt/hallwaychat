@@ -22,9 +22,23 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_episode_number", ["episodeNumber"]),
 
-  // Clips table - 2-5 minute topical segments
+  // Chapters table - human-curated topical divisions from Transistor
+  chapters: defineTable({
+    episodeId: v.id("episodes"),
+    title: v.string(), // From Transistor: "Cold Open" (marker)
+    summary: v.optional(v.string()), // AI-generated: "Fraser discusses..." (context)
+    startTime: v.number(), // seconds
+    endTime: v.number(), // seconds
+    description: v.optional(v.string()), // Optional manual description
+    orderIndex: v.number(), // chapter order in episode
+  })
+    .index("by_episode", ["episodeId"])
+    .index("by_time", ["episodeId", "startTime"]),
+
+  // Clips table - 2-5 minute topical segments (AI-generated within chapters)
   clips: defineTable({
     episodeId: v.id("episodes"),
+    chapterId: v.optional(v.id("chapters")), // Link to parent chapter
     title: v.string(), // AI-generated
     summary: v.string(), // 1-2 sentence summary
     keyQuote: v.optional(v.string()), // Highlighted quote for preview
@@ -40,15 +54,18 @@ export default defineSchema({
     isFeatured: v.boolean(), // Manually curated for homepage
     playCount: v.number(), // Analytics: total plays
     createdAt: v.number(),
+    embedding: v.optional(v.array(v.float64())), // Vector embedding for search
   })
     .index("by_episode", ["episodeId"])
+    .index("by_chapter", ["chapterId"])
     .index("by_created", ["createdAt"])
     .index("by_featured", ["isFeatured"])
     .index("by_play_count", ["playCount"]),
 
-  // Transcript segments - word-level data for precise playback
+  // Transcript segments - speaker-turn data for precise playback
   transcriptSegments: defineTable({
     episodeId: v.id("episodes"),
+    chapterId: v.optional(v.id("chapters")), // Link to parent chapter
     clipId: v.optional(v.id("clips")),
     speaker: v.string(), // "Fraser" or "Nabeel" or guest name
     text: v.string(),
@@ -56,6 +73,7 @@ export default defineSchema({
     endTime: v.number(),
   })
     .index("by_episode", ["episodeId"])
+    .index("by_chapter", ["chapterId"])
     .index("by_clip", ["clipId"])
     .index("by_time", ["episodeId", "startTime"]),
 
@@ -74,12 +92,15 @@ export default defineSchema({
   processingJobs: defineTable({
     type: v.union(
       v.literal("transcript_import"),
+      v.literal("chapter_import"),
+      v.literal("chapter_summarization"),
       v.literal("clip_segmentation"),
       v.literal("embedding_generation"),
       v.literal("visual_generation")
     ),
     episodeId: v.optional(v.id("episodes")),
     clipId: v.optional(v.id("clips")),
+    chapterId: v.optional(v.id("chapters")),
     status: v.union(
       v.literal("pending"),
       v.literal("processing"),

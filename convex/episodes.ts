@@ -101,3 +101,15 @@ export const getRecent = query({
       .take(limit);
   },
 });
+
+// Get all episodes (including drafts) for admin
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("episodes")
+      .withIndex("by_episode_number")
+      .order("desc")
+      .collect();
+  },
+});
