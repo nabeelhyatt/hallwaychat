@@ -289,17 +289,19 @@ convex/
 
 ## Implementation Phases
 
-### Phase 1: Foundation
-- [ ] Initialize Next.js 14 + Convex
-- [ ] Create schema with all tables
-- [ ] Set up RAG component
-- [ ] Basic episode/clip API
+> **Tracking:** See [GitHub Issues](https://github.com/nabeelhyatt/hallwaychat/issues) for current work.
 
-### Phase 2: Import Pipeline
-- [ ] SRT/VTT parser (use @plussub/srt-vtt-parser)
-- [ ] Claude clip segmentation action
-- [ ] Embedding generation with RAG
-- [ ] Simple admin upload form
+### Phase 1: Foundation (Complete)
+- [x] Initialize Next.js 14 + Convex
+- [x] Create schema with all tables
+- [x] Set up RAG component
+- [x] Basic episode/clip API
+
+### Phase 2: Import Pipeline (In Progress)
+- [ ] SRT/VTT parser ([#3](https://github.com/nabeelhyatt/hallwaychat/issues/3))
+- [ ] Claude clip segmentation action ([#4](https://github.com/nabeelhyatt/hallwaychat/issues/4))
+- [ ] Embedding generation with RAG ([#5](https://github.com/nabeelhyatt/hallwaychat/issues/5))
+- [ ] Admin upload form ([#6](https://github.com/nabeelhyatt/hallwaychat/issues/6))
 
 ### Phase 3: Search Experience
 - [ ] Semantic search with recency ranking

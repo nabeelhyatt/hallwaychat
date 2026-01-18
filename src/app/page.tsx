@@ -53,16 +53,13 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-indigo-950/20 dark:via-background dark:to-purple-950/20" />
-
-        <div className="relative container mx-auto px-4 py-16 md:py-24">
+        <div className="container mx-auto px-4 py-16 md:py-24">
           {/* Logo/Brand */}
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
+            <div className="p-3 rounded-xl bg-primary">
               <Mic2 className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               Hallway Chat
             </h1>
           </div>
@@ -96,7 +93,7 @@ export default function Home() {
       {/* Featured Clips Section */}
       <section className="container mx-auto px-4 py-12">
         <div className="flex items-center gap-2 mb-6">
-          <Sparkles className="w-5 h-5 text-yellow-500" />
+          <Sparkles className="w-5 h-5 text-primary" />
           <h2 className="text-2xl font-bold">Featured Clips</h2>
         </div>
 
