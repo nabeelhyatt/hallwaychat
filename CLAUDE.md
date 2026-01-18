@@ -1,6 +1,16 @@
+---
+alwaysApply: true
+---
+
 # Hallway Chat
 
 Semantic search platform for the Hallway Chat podcast. Lets founders search 39+ episodes by concept rather than browsing chronologically.
+
+## Development Rules (CRITICAL)
+
+- **NEVER COMMIT** unless explicitly asked by the user
+- **Always work in feature branches**: Use `nabeelhyatt/*` or `fraser/*` naming convention
+- **Branch-first approach**: Never develop directly in main
 
 ## MCP Server Setup
 
@@ -14,7 +24,7 @@ For Vercel MCP, remind user to run `/mcp` to authenticate via OAuth.
 
 ## Quick Context
 
-- **Frontend:** Next.js 14 (App Router) + TypeScript + Tailwind + shadcn/ui
+- **Frontend:** Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui
 - **Backend:** Convex with RAG component for vector search
 - **Hosts:** Fraser and Nabeel
 - **Domain:** Replaces hallwaychat.co
@@ -41,6 +51,39 @@ The project has foundational architecture in place:
 
 ```bash
 npm install
-npx convex dev  # Start Convex backend
-npm run dev     # Start Next.js frontend
+./script/dev    # Starts both Convex and Next.js
 ```
+
+Or run separately:
+```bash
+npx convex dev  # Start Convex backend (terminal 1)
+npm run dev     # Start Next.js frontend (terminal 2)
+```
+
+## Common Commands
+
+```bash
+npm install                # Install dependencies
+./script/dev               # Start dev servers (Convex + Next.js)
+npm run build              # Build for production
+npm run lint               # Run ESLint
+npx convex deploy          # Deploy Convex to production
+npx shadcn add <component> # Add shadcn/ui component
+```
+
+## Troubleshooting
+
+**Dev server won't start (lock file or port conflict):**
+```bash
+pkill -f "next dev"; pkill -f "convex dev"; rm -rf .next
+./script/dev
+```
+
+This kills stale processes and clears the Next.js cache.
+
+## Files to Exclude from Context
+
+- `node_modules/`, `.next/`, `.convex/`, `dist/`
+- `.env*` files (sensitive)
+- `*.lock` files
+- `convex/_generated/` (auto-generated)

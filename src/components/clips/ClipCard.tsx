@@ -32,7 +32,7 @@ export function ClipCard({ clip, showEpisode = true }: ClipCardProps) {
     <Link href={`/clip/${clip._id}`}>
       <Card className="group h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
         {/* Visual header */}
-        <div className="relative aspect-video bg-gradient-to-br from-indigo-600 to-purple-600">
+        <div className="relative aspect-video bg-primary">
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <h3 className="text-white text-lg font-bold text-center line-clamp-3">
               {clip.title}
@@ -45,7 +45,7 @@ export function ClipCard({ clip, showEpisode = true }: ClipCardProps) {
                           transition-opacity flex items-center justify-center"
           >
             <div className="bg-white rounded-full p-3 shadow-lg">
-              <Play className="w-6 h-6 text-indigo-600" />
+              <Play className="w-6 h-6 text-primary" />
             </div>
           </div>
 
@@ -71,7 +71,7 @@ export function ClipCard({ clip, showEpisode = true }: ClipCardProps) {
           {/* Guest badge */}
           {clip.guestName && (
             <div
-              className="absolute top-2 right-2 bg-yellow-500/90 text-black
+              className="absolute top-2 right-2 bg-white/90 text-foreground
                             text-xs px-2 py-1 rounded font-medium"
             >
               ft. {clip.guestName}
