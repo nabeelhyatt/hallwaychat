@@ -4,10 +4,11 @@ Search 39+ episodes of Hallway Chat by concept, not chronology. Find relevant cl
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router) + TypeScript
+- **Frontend**: Next.js 16 (App Router) + TypeScript
 - **Backend/Database**: Convex (with RAG component for vector search)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Hosting**: Vercel
+- **Podcast Host**: Transistor.fm
 
 ## Getting Started
 
@@ -32,11 +33,32 @@ This will:
 
 ### 3. Start the development server
 
+The easiest way to run both Convex and Next.js together:
+
 ```bash
-npm run dev
+./script/dev
+```
+
+Or run them separately:
+
+```bash
+npx convex dev  # Terminal 1
+npm run dev     # Terminal 2
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+## Environment Variables
+
+Create a `.env.local` file with:
+
+```bash
+# Convex deployment (production)
+CONVEX_DEPLOYMENT=prod:grateful-tapir-855
+NEXT_PUBLIC_CONVEX_URL=https://grateful-tapir-855.convex.cloud
+```
+
+The `OPENAI_API_KEY` for chapter summarization is configured in the [Convex Dashboard](https://dashboard.convex.dev) under Environment Variables.
 
 ## Admin Interface
 
