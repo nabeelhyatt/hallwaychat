@@ -33,11 +33,28 @@ function buildTranscript(
 ): string {
   const sorted = [...segments].sort((a, b) => a.startTime - b.startTime);
   let result = "";
+  let omittedCount = 0;
 
-  for (const seg of sorted) {
+  for (let i = 0; i < sorted.length; i++) {
+    const seg = sorted[i];
     const line = `${seg.speaker}: ${seg.text}\n`;
-    if (result.length + line.length > MAX_TRANSCRIPT_CHARS) break;
+
+    if (result.length + line.length > MAX_TRANSCRIPT_CHARS) {
+      // Edge case: if first line exceeds limit, truncate it
+      if (result.length === 0) {
+        result = line.slice(0, MAX_TRANSCRIPT_CHARS);
+      }
+      omittedCount = sorted.length - i;
+      break;
+    }
     result += line;
+  }
+
+  // Log truncation for debugging
+  if (omittedCount > 0) {
+    console.log(
+      `Transcript truncated at ${result.length} chars (${omittedCount} segments omitted)`
+    );
   }
 
   return result;
@@ -63,11 +80,6 @@ function parseAndValidate(response: string): SummaryResult {
   // Validate summary
   if (!parsed.summary || typeof parsed.summary !== "string") {
     throw new Error("Missing or invalid summary in response");
-  }
-
-  // Reject generic openers (will cause retry)
-  if (parsed.summary.toLowerCase().startsWith("in this chapter")) {
-    console.warn("Summary starts with banned phrase, keeping anyway");
   }
 
   // Validate tags
@@ -197,13 +209,14 @@ export const generateSummaries = action({
         }
       }
 
-      // 5. Process in parallel batches
+      // 5. Process in parallel batches with graceful error handling
       let completed = 0;
+      let failedChapters: string[] = [];
 
       for (let i = 0; i < chapters.length; i += PARALLEL_BATCH_SIZE) {
         const batch = chapters.slice(i, i + PARALLEL_BATCH_SIZE);
 
-        await Promise.all(
+        const results = await Promise.allSettled(
           batch.map(async (chapter) => {
             const segments = segmentsByChapter.get(chapter._id) ?? [];
 
@@ -232,11 +245,31 @@ export const generateSummaries = action({
           })
         );
 
+        // Track failures but continue processing
+        results.forEach((result, idx) => {
+          if (result.status === "rejected") {
+            const chapter = batch[idx];
+            console.error(
+              `Failed to summarize chapter "${chapter.title}":`,
+              result.reason
+            );
+            failedChapters.push(chapter.title);
+          }
+        });
+
         completed += batch.length;
         await ctx.runMutation(internal.processingJobs.updateProgress, {
           jobId,
           progress: Math.round((completed / chapters.length) * 100),
         });
+      }
+
+      // Log summary of failures
+      if (failedChapters.length > 0) {
+        console.error(
+          `${failedChapters.length} chapter(s) failed to summarize:`,
+          failedChapters
+        );
       }
 
       // 6. Mark complete

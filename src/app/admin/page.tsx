@@ -122,7 +122,11 @@ function ChapterStatus({
     }
   };
 
-  const handleGenerateSummaries = async () => {
+  const handleGenerateSummaries = async (regenerateAll = false) => {
+    if (regenerateAll && !confirm("Regenerate all summaries? This will overwrite existing summaries.")) {
+      return;
+    }
+
     setIsSummarizing(true);
     setSummaryError(null);
 
@@ -257,7 +261,7 @@ function ChapterStatus({
                 isJobInProgress ||
                 !hasChaptersToSummarize
               }
-              onClick={handleGenerateSummaries}
+              onClick={() => handleGenerateSummaries(false)}
             >
               {isSummarizing || isJobInProgress
                 ? "Generating..."
@@ -265,6 +269,16 @@ function ChapterStatus({
                   ? "All Summarized"
                   : "Generate Summaries"}
             </Button>
+            {allHaveSummaries && !isJobInProgress && (
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={isSummarizing}
+                onClick={() => handleGenerateSummaries(true)}
+              >
+                Regenerate All
+              </Button>
+            )}
           </div>
         </div>
       )}
