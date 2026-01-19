@@ -28,6 +28,8 @@ For Vercel MCP, remind user to run `/mcp` to authenticate via OAuth.
 - **Backend:** Convex with RAG component for vector search
 - **Hosts:** Fraser and Nabeel
 - **Domain:** Replaces hallwaychat.co
+- **Production Convex:** `grateful-tapir-855` (https://grateful-tapir-855.convex.cloud)
+- **Issue Tracking:** [GitHub Issues](https://github.com/nabeelhyatt/hallwaychat/issues)
 
 ## Key Documentation
 
@@ -43,7 +45,9 @@ See **[docs/PROJECT_SPEC.md](docs/PROJECT_SPEC.md)** for the complete project sp
 ## Current State
 
 The project has foundational architecture in place:
-- Convex schema with 5 tables (episodes, clips, transcriptSegments, topics, processingJobs)
+- Convex schema with 5 tables (episodes, chapters, clips, transcriptSegments, topics, processingJobs)
+- Homepage displays real chapter data with semantic tags
+- Admin interface (`/admin`) for importing episodes, transcripts, chapters, and generating AI summaries
 - Basic UI components (ClipCard, SearchBar, TopicBadge)
 - Next.js app structure
 
@@ -70,6 +74,16 @@ npm run lint               # Run ESLint
 npx convex deploy          # Deploy Convex to production
 npx shadcn add <component> # Add shadcn/ui component
 ```
+
+## Environment Variables
+
+The `.env.local` file needs:
+```bash
+CONVEX_DEPLOYMENT=prod:grateful-tapir-855
+NEXT_PUBLIC_CONVEX_URL=https://grateful-tapir-855.convex.cloud
+```
+
+`OPENAI_API_KEY` is configured in the Convex Dashboard (not local).
 
 ## Troubleshooting
 
