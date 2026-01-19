@@ -26,7 +26,8 @@ export default defineSchema({
   chapters: defineTable({
     episodeId: v.id("episodes"),
     title: v.string(), // From Transistor: "Cold Open" (marker)
-    summary: v.optional(v.string()), // AI-generated: "Fraser discusses..." (context)
+    summary: v.optional(v.string()), // AI-generated: 2-sentence insight
+    semanticTags: v.optional(v.array(v.string())), // AI-generated: keywords for search
     startTime: v.number(), // seconds
     endTime: v.number(), // seconds
     description: v.optional(v.string()), // Optional manual description

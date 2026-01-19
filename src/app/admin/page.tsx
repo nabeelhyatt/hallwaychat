@@ -98,8 +98,11 @@ function ChapterStatus({
 }) {
   const status = useQuery(api.chapters.getImportStatus, { episodeId });
   const importChapters = useAction(api.chapters.importFromURL);
+  const generateSummaries = useAction(api.chapterSummaries.generateSummaries);
   const [isImporting, setIsImporting] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   const handleImport = async () => {
     if (!chaptersUrl) return;
@@ -119,10 +122,32 @@ function ChapterStatus({
     }
   };
 
+  const handleGenerateSummaries = async (regenerateAll = false) => {
+    if (regenerateAll && !confirm("Regenerate all summaries? This will overwrite existing summaries.")) {
+      return;
+    }
+
+    setIsSummarizing(true);
+    setSummaryError(null);
+
+    try {
+      await generateSummaries({ episodeId });
+    } catch (e) {
+      setSummaryError(e instanceof Error ? e.message : "Summary generation failed");
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
   if (!status) return null;
 
-  const { hasChapters, chapterCount, chapters, linkedSegments, segmentCount, latestJob } =
+  const { hasChapters, chapterCount, chapters, linkedSegments, segmentCount, latestJob, summarizationJob } =
     status;
+
+  // Derive computed state
+  const allHaveSummaries = chapters?.every((ch) => ch.hasSummary) ?? false;
+  const isJobInProgress = summarizationJob?.status === "processing";
+  const hasChaptersToSummarize = chapterCount > 0;
 
   return (
     <div className="space-y-3 rounded-md border p-4">
@@ -205,10 +230,55 @@ function ChapterStatus({
             ))}
           </ul>
 
+          {/* Summarization progress indicator */}
+          {summarizationJob?.status === "processing" && (
+            <div className="flex items-center gap-2 text-sm text-blue-600">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
+              Generating summaries... {summarizationJob.progress}%
+            </div>
+          )}
+
+          {/* Summary error display */}
+          {summaryError && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              {summaryError}
+            </div>
+          )}
+
+          {summarizationJob?.status === "failed" && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              Summary generation failed: {summarizationJob.error}
+            </div>
+          )}
+
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" size="sm" disabled>
-              Generate Summaries
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={
+                isSummarizing ||
+                allHaveSummaries ||
+                isJobInProgress ||
+                !hasChaptersToSummarize
+              }
+              onClick={() => handleGenerateSummaries(false)}
+            >
+              {isSummarizing || isJobInProgress
+                ? "Generating..."
+                : allHaveSummaries
+                  ? "All Summarized"
+                  : "Generate Summaries"}
             </Button>
+            {allHaveSummaries && !isJobInProgress && (
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={isSummarizing}
+                onClick={() => handleGenerateSummaries(true)}
+              >
+                Regenerate All
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -335,9 +405,13 @@ export default function AdminPage() {
       chaptersUrl: string | null;
       duration: number;
       guid: string;
+      audioUrl: string;
+      publishedAt: number;
+      description: string;
     }>
   >([]);
   const [rssLoading, setRssLoading] = useState(false);
+  const [isCreatingEpisode, setIsCreatingEpisode] = useState(false);
 
   // Get episodes from Convex (need to match with RSS)
   const episodes = useQuery(api.episodes.listAll);
@@ -345,6 +419,7 @@ export default function AdminPage() {
   // Import action
   const importFromURL = useAction(api.transcriptImport.importFromURL);
   const deleteSegments = useMutation(api.transcriptImport.deleteEpisodeSegments);
+  const createEpisode = useMutation(api.episodes.create);
 
   // Find matching Convex episode for selected RSS episode
   const selectedEpisode = episodes?.find((ep) => {
@@ -402,6 +477,28 @@ export default function AdminPage() {
       await deleteSegments({ episodeId: selectedEpisode._id });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Delete failed");
+    }
+  };
+
+  const handleCreateEpisode = async () => {
+    if (!selectedRssEpisode) return;
+
+    setIsCreatingEpisode(true);
+    setError(null);
+
+    try {
+      await createEpisode({
+        title: selectedRssEpisode.title,
+        description: selectedRssEpisode.description || undefined,
+        episodeNumber: selectedRssEpisode.episodeNumber,
+        publishedAt: selectedRssEpisode.publishedAt,
+        duration: selectedRssEpisode.duration,
+        audioUrl: selectedRssEpisode.audioUrl,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create episode");
+    } finally {
+      setIsCreatingEpisode(false);
     }
   };
 
@@ -469,10 +566,20 @@ export default function AdminPage() {
                 </p>
               )}
               {episodes !== undefined && !selectedEpisode && (
-                <p className="mt-2 text-sm text-amber-600">
-                  Episode not found in database. Create it first before
-                  importing.
-                </p>
+                <div className="mt-2 space-y-2">
+                  <p className="text-sm text-amber-600">
+                    Episode not found in database. Create it first before
+                    importing.
+                  </p>
+                  <Button
+                    onClick={handleCreateEpisode}
+                    disabled={isCreatingEpisode}
+                    size="sm"
+                    variant="outline"
+                  >
+                    {isCreatingEpisode ? "Creating..." : "Create Episode in Database"}
+                  </Button>
+                </div>
               )}
             </div>
           )}
