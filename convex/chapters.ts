@@ -327,3 +327,38 @@ export const getSegmentsByEpisode = internalQuery({
       .collect();
   },
 });
+
+// List recent chapters with episode data for homepage display
+export const listRecentWithEpisodes = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit = 12 }) => {
+    // Get all chapters
+    const chapters = await ctx.db.query("chapters").collect();
+
+    // Filter to only chapters with summaries
+    const withSummaries = chapters.filter((ch) => ch.summary);
+
+    // Batch fetch unique episodes
+    const episodeIds = [...new Set(withSummaries.map((c) => c.episodeId))];
+    const episodes = await Promise.all(episodeIds.map((id) => ctx.db.get(id)));
+    const episodeMap = new Map(
+      episodes.filter(Boolean).map((e) => [e!._id, e])
+    );
+
+    // Combine, filter orphans, sort by episode date then chapter order
+    return withSummaries
+      .map((chapter) => ({
+        ...chapter,
+        duration: chapter.endTime - chapter.startTime,
+        episode: episodeMap.get(chapter.episodeId) ?? null,
+      }))
+      .filter((ch) => ch.episode !== null)
+      .sort((a, b) => {
+        const aDate = a.episode?.publishedAt ?? 0;
+        const bDate = b.episode?.publishedAt ?? 0;
+        if (bDate !== aDate) return bDate - aDate;
+        return a.orderIndex - b.orderIndex;
+      })
+      .slice(0, limit);
+  },
+});
