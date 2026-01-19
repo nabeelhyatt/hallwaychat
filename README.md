@@ -38,6 +38,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
+## Admin Interface
+
+The `/admin` page provides tools for managing podcast content:
+
+- **Import episodes** from Transistor (podcast host)
+- **Import transcripts** from SRT files
+- **Import chapters** from Transistor chapter markers
+- **Generate AI summaries** for chapters using GPT-4
+
+Access it at [http://localhost:3000/admin](http://localhost:3000/admin) during development.
+
 ## Project Structure
 
 ```
@@ -48,6 +59,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 │   └── topics.ts        # Topic queries/mutations
 ├── src/
 │   ├── app/             # Next.js App Router pages
+│   │   └── admin/       # Admin interface for content management
 │   ├── components/      # React components
 │   │   ├── clips/       # Clip-related components
 │   │   ├── search/      # Search bar and results
@@ -73,11 +85,14 @@ For the complete project specification, see **[docs/PROJECT_SPEC.md](docs/PROJEC
 
 - [x] Homepage with search bar and featured clips
 - [x] Convex schema for episodes, clips, and topics
+- [x] Admin interface for content import and AI summarization
 - [ ] Semantic search with vector embeddings
 - [ ] Clip playback with timestamp control
 - [ ] Topic browsing and filtering
 - [ ] AI era badges for content dating
 - [ ] Dynamic OG images for sharing
+
+Track progress and report issues on [GitHub Issues](https://github.com/nabeelhyatt/hallwaychat/issues).
 
 ## AI Development Setup (Claude Code)
 
