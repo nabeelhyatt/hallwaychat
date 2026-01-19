@@ -254,6 +254,7 @@ export const getImportStatus = query({
       .collect();
 
     const latestJob = jobs.find((j) => j.type === "chapter_import");
+    const summarizationJob = jobs.find((j) => j.type === "chapter_summarization");
 
     // Count segments linked to chapters
     const segments = await ctx.db
@@ -282,6 +283,13 @@ export const getImportStatus = query({
             completedAt: latestJob.completedAt,
           }
         : null,
+      summarizationJob: summarizationJob
+        ? {
+            status: summarizationJob.status,
+            progress: summarizationJob.progress,
+            error: summarizationJob.error,
+          }
+        : null,
     };
   },
 });
@@ -304,6 +312,17 @@ export const getSegmentsByChapter = query({
     return ctx.db
       .query("transcriptSegments")
       .withIndex("by_chapter", (q) => q.eq("chapterId", chapterId))
+      .collect();
+  },
+});
+
+// Internal query - get all segments for an episode (for batch fetch in summary generation)
+export const getSegmentsByEpisode = internalQuery({
+  args: { episodeId: v.id("episodes") },
+  handler: async (ctx, { episodeId }) => {
+    return ctx.db
+      .query("transcriptSegments")
+      .withIndex("by_episode", (q) => q.eq("episodeId", episodeId))
       .collect();
   },
 });

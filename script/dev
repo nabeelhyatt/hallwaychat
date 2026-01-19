@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Clean up any existing dev processes to prevent lock conflicts
+echo "Cleaning up existing dev processes..."
+pkill -f "next dev" 2>/dev/null
+pkill -f "convex dev" 2>/dev/null
+
+# Remove stale Next.js lock file if it exists
+rm -rf .next/dev/lock 2>/dev/null
+
+# Small delay to ensure processes are fully terminated
+sleep 1
+
 # Start Convex in the background
 npx convex dev &
 CONVEX_PID=$!

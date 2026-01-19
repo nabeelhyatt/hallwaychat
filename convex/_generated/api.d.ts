@@ -8,10 +8,12 @@
  * @module
  */
 
+import type * as chapterSummaries from "../chapterSummaries.js";
 import type * as chapters from "../chapters.js";
 import type * as clips from "../clips.js";
 import type * as episodes from "../episodes.js";
 import type * as lib_transcriptParser from "../lib/transcriptParser.js";
+import type * as lib_urlValidator from "../lib/urlValidator.js";
 import type * as processingJobs from "../processingJobs.js";
 import type * as rss from "../rss.js";
 import type * as topics from "../topics.js";
@@ -24,10 +26,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  chapterSummaries: typeof chapterSummaries;
   chapters: typeof chapters;
   clips: typeof clips;
   episodes: typeof episodes;
   "lib/transcriptParser": typeof lib_transcriptParser;
+  "lib/urlValidator": typeof lib_urlValidator;
   processingJobs: typeof processingJobs;
   rss: typeof rss;
   topics: typeof topics;
