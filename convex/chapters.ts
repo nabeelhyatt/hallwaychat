@@ -299,9 +299,10 @@ export const updateSummary = internalMutation({
   args: {
     chapterId: v.id("chapters"),
     summary: v.string(),
+    semanticTags: v.optional(v.array(v.string())),
   },
-  handler: async (ctx, { chapterId, summary }) => {
-    await ctx.db.patch(chapterId, { summary });
+  handler: async (ctx, { chapterId, summary, semanticTags }) => {
+    await ctx.db.patch(chapterId, { summary, semanticTags });
   },
 });
 
