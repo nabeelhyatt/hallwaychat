@@ -459,6 +459,17 @@ export default function AdminPage() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isSheetOpen) return;
+
+      // Skip if user is in an input, textarea, or contenteditable
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       if (e.key === "ArrowLeft") handlePrevious();
       if (e.key === "ArrowRight") handleNext();
     };
@@ -673,8 +684,16 @@ export default function AdminPage() {
               {episodes.map((ep, index) => (
                 <li
                   key={ep._id}
-                  className="text-sm flex items-center justify-between group cursor-pointer hover:bg-muted/50 rounded px-2 py-1 -mx-2"
+                  role="button"
+                  tabIndex={0}
+                  className="text-sm flex items-center justify-between group cursor-pointer hover:bg-muted/50 focus:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded px-2 py-1 -mx-2"
                   onClick={() => handleEpisodeClick(index)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleEpisodeClick(index);
+                    }
+                  }}
                 >
                   <span>
                     <span className="font-medium">#{ep.episodeNumber}:</span>{" "}
@@ -682,7 +701,7 @@ export default function AdminPage() {
                   </span>
                   <Badge
                     variant={ep.status === "published" ? "default" : "outline"}
-                    className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="text-xs opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity"
                   >
                     {ep.status}
                   </Badge>

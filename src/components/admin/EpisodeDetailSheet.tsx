@@ -68,20 +68,20 @@ export function EpisodeDetailSheet({
   hasPrevious,
   hasNext,
 }: EpisodeDetailSheetProps) {
-  // Fetch related data when episode is selected
+  // Fetch related data only when episode is selected AND sheet is open
   const chapters = useQuery(
     api.chapters.getByEpisode,
-    episode ? { episodeId: episode._id } : "skip"
+    episode && open ? { episodeId: episode._id } : "skip"
   );
 
   const clips = useQuery(
     api.clips.getByEpisode,
-    episode ? { episodeId: episode._id } : "skip"
+    episode && open ? { episodeId: episode._id } : "skip"
   );
 
   const segments = useQuery(
     api.transcriptImport.getEpisodeSegments,
-    episode ? { episodeId: episode._id } : "skip"
+    episode && open ? { episodeId: episode._id } : "skip"
   );
 
   if (!episode) return null;
