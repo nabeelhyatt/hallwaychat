@@ -1,52 +1,132 @@
 "use client";
 
+import { useMemo } from "react";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { SearchBar } from "@/components/search/SearchBar";
 import { ClipCard } from "@/components/clips/ClipCard";
 import { TopicBadge } from "@/components/topics/TopicBadge";
+import { useConvexAvailable } from "@/components/providers/ConvexClientProvider";
 import { Mic2, Sparkles } from "lucide-react";
 
-// Placeholder data until Convex is connected
-const PLACEHOLDER_CLIPS = [
-  {
-    _id: "1",
-    title: "Why AI Agents Need Memory to Be Useful",
-    summary: "Discussion on why memory is the missing piece for AI assistants",
-    keyQuote: "Without memory, every conversation starts from zero",
-    duration: 245,
-    topics: ["ai-agents", "product-design", "memory"],
-    aiEra: "gpt-4-era",
-    episode: { title: "Memory, Context, and Product Design", episodeNumber: 38 },
-  },
-  {
-    _id: "2",
-    title: "The Future of Vibe Coding",
-    summary: "How natural language programming is changing software development",
-    keyQuote: "It's not about writing less code, it's about thinking at a higher level",
-    duration: 312,
-    topics: ["vibe-coding", "ai-development", "future-of-work"],
-    aiEra: "claude-3-era",
-    episode: { title: "Building Open World AI", episodeNumber: 37 },
-    guestName: "Andrew Mason",
-  },
-  {
-    _id: "3",
-    title: "Ubiquity Over Ownership in AI",
-    summary: "Why the best AI strategy might be everywhere, not exclusive",
-    keyQuote: "Be water - flow into every container",
-    duration: 189,
-    topics: ["ai-strategy", "startup-advice", "distribution"],
-    episode: { title: "Be Water, Ubiquity over Ownership", episodeNumber: 38 },
-  },
-];
+// Separate component that uses Convex hooks - only rendered when Convex is available
+function ChaptersContent() {
+  const chapters = useQuery(api.chapters.listRecentWithEpisodes);
+  const isLoading = chapters === undefined;
 
-const PLACEHOLDER_TOPICS = [
-  { name: "AI Strategy", count: 24 },
-  { name: "Product Design", count: 18 },
-  { name: "Fundraising", count: 15 },
-  { name: "Vibe Coding", count: 12 },
-  { name: "AI Agents", count: 11 },
-  { name: "Startup Advice", count: 9 },
-];
+  // Client-side tag aggregation from chapter semantic tags
+  const topics = useMemo(() => {
+    if (!chapters) return [];
+    const counts: Record<string, number> = {};
+    chapters.forEach((ch) =>
+      (ch.semanticTags ?? []).forEach((tag) => {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      })
+    );
+    return Object.entries(counts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([name, count]) => ({ name, count }));
+  }, [chapters]);
+
+  // Transform chapter data to ClipCard format
+  const clips = chapters?.map((ch) => ({
+    _id: ch._id,
+    title: ch.title,
+    summary: ch.summary ?? "",
+    duration: ch.duration,
+    topics: ch.semanticTags ?? [],
+    guestName: ch.episode?.guestName,
+    episode: ch.episode
+      ? {
+          title: ch.episode.title,
+          episodeNumber: ch.episode.episodeNumber,
+        }
+      : null,
+  }));
+
+  return (
+    <>
+      {/* Topic Cloud */}
+      <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-2xl mx-auto">
+        {isLoading ? (
+          [...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="h-7 w-20 bg-muted animate-pulse rounded-full"
+            />
+          ))
+        ) : topics.length > 0 ? (
+          topics.map((topic) => (
+            <TopicBadge
+              key={topic.name}
+              topic={topic.name}
+              count={topic.count}
+              size="md"
+            />
+          ))
+        ) : null}
+      </div>
+
+      {/* Featured Clips Section */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="flex items-center gap-2 mb-6">
+          <Sparkles className="w-5 h-5 text-primary" />
+          <h2 className="text-2xl font-bold">Featured Chapters</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            [...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-64 bg-muted animate-pulse rounded-lg"
+              />
+            ))
+          ) : clips?.length === 0 ? (
+            <p className="col-span-full text-center text-muted-foreground py-12">
+              Processing chapters... Check back soon!
+            </p>
+          ) : (
+            clips?.map((clip) => <ClipCard key={clip._id} clip={clip} />)
+          )}
+        </div>
+      </section>
+    </>
+  );
+}
+
+// Wrapper that checks for Convex availability
+function ConvexContent() {
+  const isAvailable = useConvexAvailable();
+
+  if (!isAvailable) {
+    // Convex not configured - show placeholder
+    return (
+      <>
+        <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-2xl mx-auto">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="h-7 w-20 bg-muted animate-pulse rounded-full"
+            />
+          ))}
+        </div>
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center gap-2 mb-6">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <h2 className="text-2xl font-bold">Featured Chapters</h2>
+          </div>
+          <p className="text-center text-muted-foreground py-12">
+            Connect Convex to see chapters.
+          </p>
+        </section>
+      </>
+    );
+  }
+
+  return <ChaptersContent />;
+}
 
 export default function Home() {
   return (
@@ -75,40 +155,11 @@ export default function Home() {
 
           {/* Search Bar */}
           <SearchBar />
-
-          {/* Topic Cloud */}
-          <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-2xl mx-auto">
-            {PLACEHOLDER_TOPICS.map((topic) => (
-              <TopicBadge
-                key={topic.name}
-                topic={topic.name}
-                count={topic.count}
-                size="md"
-              />
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* Featured Clips Section */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="flex items-center gap-2 mb-6">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold">Featured Clips</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PLACEHOLDER_CLIPS.map((clip) => (
-            <ClipCard key={clip._id} clip={clip} />
-          ))}
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-muted-foreground text-sm">
-            Connect Convex to see real clips from the podcast
-          </p>
-        </div>
-      </section>
+      {/* Dynamic content - handles Convex availability */}
+      <ConvexContent />
 
       {/* Footer */}
       <footer className="border-t border-border mt-12">

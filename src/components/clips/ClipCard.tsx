@@ -18,19 +18,19 @@ interface ClipCardProps {
       episodeNumber: number;
     } | null;
   };
+  href?: string;
   showEpisode?: boolean;
 }
 
-export function ClipCard({ clip, showEpisode = true }: ClipCardProps) {
+export function ClipCard({ clip, href, showEpisode = true }: ClipCardProps) {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  return (
-    <Link href={`/clip/${clip._id}`}>
-      <Card className="group h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
+  const card = (
+    <Card className="group h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
         {/* Visual header */}
         <div className="relative aspect-video bg-primary">
           <div className="absolute inset-0 flex items-center justify-center p-4">
@@ -103,7 +103,12 @@ export function ClipCard({ clip, showEpisode = true }: ClipCardProps) {
             </p>
           )}
         </CardContent>
-      </Card>
-    </Link>
+    </Card>
   );
+
+  if (href) {
+    return <Link href={href}>{card}</Link>;
+  }
+
+  return card;
 }

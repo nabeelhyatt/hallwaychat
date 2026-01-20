@@ -11,7 +11,8 @@ rm -rf .next/dev/lock 2>/dev/null
 # Small delay to ensure processes are fully terminated
 sleep 1
 
-# Start Convex in the background
+# Start Convex in the background (reads from .env.local)
+echo "Starting Convex dev server..."
 npx convex dev &
 CONVEX_PID=$!
 

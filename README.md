@@ -4,10 +4,11 @@ Search 39+ episodes of Hallway Chat by concept, not chronology. Find relevant cl
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router) + TypeScript
+- **Frontend**: Next.js 16 (App Router) + TypeScript
 - **Backend/Database**: Convex (with RAG component for vector search)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Hosting**: Vercel
+- **Podcast Host**: Transistor.fm
 
 ## Getting Started
 
@@ -32,11 +33,43 @@ This will:
 
 ### 3. Start the development server
 
+The easiest way to run both Convex and Next.js together:
+
 ```bash
-npm run dev
+./script/dev
+```
+
+Or run them separately:
+
+```bash
+npx convex dev  # Terminal 1
+npm run dev     # Terminal 2
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+## Environment Variables
+
+Create a `.env.local` file with:
+
+```bash
+# Convex deployment (production)
+CONVEX_DEPLOYMENT=prod:grateful-tapir-855
+NEXT_PUBLIC_CONVEX_URL=https://grateful-tapir-855.convex.cloud
+```
+
+The `OPENAI_API_KEY` for chapter summarization is configured in the [Convex Dashboard](https://dashboard.convex.dev) under Environment Variables.
+
+## Admin Interface
+
+The `/admin` page provides tools for managing podcast content:
+
+- **Import episodes** from Transistor (podcast host)
+- **Import transcripts** from SRT files
+- **Import chapters** from Transistor chapter markers
+- **Generate AI summaries** for chapters using GPT-4
+
+Access it at [http://localhost:3000/admin](http://localhost:3000/admin) during development.
 
 ## Project Structure
 
@@ -48,6 +81,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 │   └── topics.ts        # Topic queries/mutations
 ├── src/
 │   ├── app/             # Next.js App Router pages
+│   │   └── admin/       # Admin interface for content management
 │   ├── components/      # React components
 │   │   ├── clips/       # Clip-related components
 │   │   ├── search/      # Search bar and results
@@ -73,11 +107,14 @@ For the complete project specification, see **[docs/PROJECT_SPEC.md](docs/PROJEC
 
 - [x] Homepage with search bar and featured clips
 - [x] Convex schema for episodes, clips, and topics
+- [x] Admin interface for content import and AI summarization
 - [ ] Semantic search with vector embeddings
 - [ ] Clip playback with timestamp control
 - [ ] Topic browsing and filtering
 - [ ] AI era badges for content dating
 - [ ] Dynamic OG images for sharing
+
+Track progress and report issues on [GitHub Issues](https://github.com/nabeelhyatt/hallwaychat/issues).
 
 ## AI Development Setup (Claude Code)
 
