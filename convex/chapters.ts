@@ -354,8 +354,8 @@ export const listRecentWithEpisodes = query({
       }))
       .filter((ch) => ch.episode !== null)
       .sort((a, b) => {
-        const aDate = a.episode?.publishedAt ?? 0;
-        const bDate = b.episode?.publishedAt ?? 0;
+        const aDate = a.episode!.publishedAt;
+        const bDate = b.episode!.publishedAt;
         if (bDate !== aDate) return bDate - aDate;
         return a.orderIndex - b.orderIndex;
       })
