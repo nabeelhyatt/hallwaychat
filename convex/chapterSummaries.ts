@@ -96,7 +96,8 @@ function parseAndValidate(response: string): SummaryResult {
 async function generateChapterSummary(
   chapterTitle: string,
   episodeTitle: string,
-  transcript: string
+  transcript: string,
+  guestName?: string
 ): Promise<SummaryResult> {
   const openai = getOpenAI();
 
@@ -129,7 +130,9 @@ Rules for summary:
 - Exactly 2 sentences, max 50 words total
 - Sentence 1: Specific—name the most important products, people, companies
 - Sentence 2: Thematic—the broader insight or takeaway
-- Never start with "In this chapter" or "Fraser and Nabeel discuss"
+- NEVER mention the hosts "Fraser" or "Nabeel" by name—they are implied as the podcast hosts
+- ${guestName ? `You may reference the guest "${guestName}" if relevant to the content` : "Do not reference any podcast hosts by name"}
+- Use topic-focused phrasing (e.g., "AI is transforming..." not "Fraser explains how AI...")
 
 Rules for semanticTags (IMPORTANT):
 - 8-12 keywords that EXPAND searchability beyond the summary
@@ -234,7 +237,8 @@ export const generateSummaries = action({
             const result = await generateChapterSummary(
               chapter.title,
               episodeTitle,
-              transcript
+              transcript,
+              episode.guestName ?? undefined
             );
 
             await ctx.runMutation(internal.chapters.updateSummary, {
