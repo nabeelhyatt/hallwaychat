@@ -11,7 +11,7 @@ import { Mic2, Sparkles } from "lucide-react";
 
 // Separate component that uses Convex hooks - only rendered when Convex is available
 function ChaptersContent() {
-  const chapters = useQuery(api.chapters.listRecentWithEpisodes);
+  const chapters = useQuery(api.chapters.listRecentWithEpisodes, { limit: 50 });
   const isLoading = chapters === undefined;
 
   // Client-side tag aggregation from chapter semantic tags
@@ -29,21 +29,32 @@ function ChaptersContent() {
       .map(([name, count]) => ({ name, count }));
   }, [chapters]);
 
-  // Transform chapter data to ClipCard format
-  const clips = chapters?.map((ch) => ({
-    _id: ch._id,
-    title: ch.title,
-    summary: ch.summary ?? "",
-    duration: ch.duration,
-    topics: ch.semanticTags ?? [],
-    guestName: ch.episode?.guestName,
-    episode: ch.episode
-      ? {
-          title: ch.episode.title,
-          episodeNumber: ch.episode.episodeNumber,
-        }
-      : null,
-  }));
+  // P2 fix: Memoize chapter to clip transformation
+  const clips = useMemo(() => {
+    if (!chapters) return [];
+    return chapters
+      .filter((ch) => ch.title !== "Cold Open")
+      .map((ch) => ({
+        _id: ch._id,
+        title: ch.title,
+        summary: ch.summary ?? "",
+        duration: ch.duration,
+        topics: ch.semanticTags ?? [],
+        guestName: ch.episode?.guestName,
+        episode: ch.episode
+          ? {
+              title: ch.episode.title,
+              episodeNumber: ch.episode.episodeNumber,
+              audioUrl: ch.episode.audioUrl,
+            }
+          : null,
+        // Audio playback data
+        audioUrl: ch.episode?.audioUrl,
+        startTime: ch.startTime,
+        endTime: ch.endTime,
+        type: "chapter" as const,
+      }));
+  }, [chapters]);
 
   return (
     <>
@@ -83,12 +94,12 @@ function ChaptersContent() {
                 className="h-64 bg-muted animate-pulse rounded-lg"
               />
             ))
-          ) : clips?.length === 0 ? (
+          ) : clips.length === 0 ? (
             <p className="col-span-full text-center text-muted-foreground py-12">
               Processing chapters... Check back soon!
             </p>
           ) : (
-            clips?.map((clip) => <ClipCard key={clip._id} clip={clip} />)
+            clips.map((clip) => <ClipCard key={clip._id} clip={clip} />)
           )}
         </div>
       </section>
