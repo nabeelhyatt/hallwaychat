@@ -32,6 +32,7 @@ export default defineSchema({
     endTime: v.number(), // seconds
     description: v.optional(v.string()), // Optional manual description
     orderIndex: v.number(), // chapter order in episode
+    playCount: v.optional(v.number()), // Analytics: total plays
   })
     .index("by_episode", ["episodeId"])
     .index("by_time", ["episodeId", "startTime"]),

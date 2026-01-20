@@ -206,6 +206,19 @@ export const get = query({
   },
 });
 
+// Increment play count for a chapter
+export const incrementPlayCount = mutation({
+  args: { chapterId: v.id("chapters") },
+  handler: async (ctx, { chapterId }) => {
+    const chapter = await ctx.db.get(chapterId);
+    if (!chapter) return;
+
+    await ctx.db.patch(chapterId, {
+      playCount: (chapter.playCount ?? 0) + 1,
+    });
+  },
+});
+
 // Delete all chapters for an episode (for re-import)
 export const deleteEpisodeChapters = mutation({
   args: { episodeId: v.id("episodes") },

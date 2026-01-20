@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/providers/ConvexClientProvider";
+import { AudioPlayerProvider } from "@/components/providers/AudioPlayerProvider";
+import { FloatingPlayer } from "@/components/player/FloatingPlayer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ConvexClientProvider>{children}</ConvexClientProvider>
+        <ConvexClientProvider>
+          <AudioPlayerProvider>
+            {children}
+            <FloatingPlayer />
+          </AudioPlayerProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );
