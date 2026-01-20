@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
+import { EpisodeDetailSheet } from "@/components/admin/EpisodeDetailSheet";
 
 // Episode selector with RSS data
 function EpisodeSelector({
@@ -395,6 +397,10 @@ export default function AdminPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Episode detail sheet state
+  const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState<number | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   // Fetch RSS feed
   const fetchRSS = useAction(api.rss.fetchRSSFeed);
   const [rssEpisodes, setRssEpisodes] = useState<
@@ -426,6 +432,40 @@ export default function AdminPage() {
     const rssEp = rssEpisodes.find((r) => r.guid === selectedGuid);
     return rssEp && ep.episodeNumber === rssEp.episodeNumber;
   });
+
+  // Episode detail sheet handlers
+  const selectedEpisodeForDetail = selectedEpisodeIndex !== null && episodes
+    ? episodes[selectedEpisodeIndex]
+    : null;
+
+  const handleEpisodeClick = (index: number) => {
+    setSelectedEpisodeIndex(index);
+    setIsSheetOpen(true);
+  };
+
+  const handlePrevious = useCallback(() => {
+    if (selectedEpisodeIndex !== null && selectedEpisodeIndex > 0) {
+      setSelectedEpisodeIndex(selectedEpisodeIndex - 1);
+    }
+  }, [selectedEpisodeIndex]);
+
+  const handleNext = useCallback(() => {
+    if (selectedEpisodeIndex !== null && episodes && selectedEpisodeIndex < episodes.length - 1) {
+      setSelectedEpisodeIndex(selectedEpisodeIndex + 1);
+    }
+  }, [selectedEpisodeIndex, episodes]);
+
+  // Keyboard navigation for episode sheet
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isSheetOpen) return;
+      if (e.key === "ArrowLeft") handlePrevious();
+      if (e.key === "ArrowRight") handleNext();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSheetOpen, handlePrevious, handleNext]);
 
   const handleLoadRSS = async () => {
     setRssLoading(true);
@@ -630,16 +670,39 @@ export default function AdminPage() {
             </p>
           ) : (
             <ul className="space-y-2">
-              {episodes.map((ep) => (
-                <li key={ep._id} className="text-sm">
-                  <span className="font-medium">#{ep.episodeNumber}:</span>{" "}
-                  {ep.title}
+              {episodes.map((ep, index) => (
+                <li
+                  key={ep._id}
+                  className="text-sm flex items-center justify-between group cursor-pointer hover:bg-muted/50 rounded px-2 py-1 -mx-2"
+                  onClick={() => handleEpisodeClick(index)}
+                >
+                  <span>
+                    <span className="font-medium">#{ep.episodeNumber}:</span>{" "}
+                    {ep.title}
+                  </span>
+                  <Badge
+                    variant={ep.status === "published" ? "default" : "outline"}
+                    className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    {ep.status}
+                  </Badge>
                 </li>
               ))}
             </ul>
           )}
         </CardContent>
       </Card>
+
+      {/* Episode Detail Sheet */}
+      <EpisodeDetailSheet
+        episode={selectedEpisodeForDetail}
+        open={isSheetOpen}
+        onOpenChange={setIsSheetOpen}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        hasPrevious={selectedEpisodeIndex !== null && selectedEpisodeIndex > 0}
+        hasNext={selectedEpisodeIndex !== null && episodes !== undefined && selectedEpisodeIndex < episodes.length - 1}
+      />
     </div>
   );
 }
