@@ -58,8 +58,7 @@ export function AudioPlayerProvider({ children }: AudioPlayerProviderProps) {
   // Track which item is associated with which generation
   const itemByGenerationRef = useRef<Map<number, PlayableItem>>(new Map());
 
-  // P2 fix: Throttle time updates with requestAnimationFrame
-  const rafRef = useRef<number | null>(null);
+  // P2 fix: Throttle time updates
   const lastTimeUpdateRef = useRef(0);
 
   // Calculate clip-relative values
@@ -94,12 +93,12 @@ export function AudioPlayerProvider({ children }: AudioPlayerProviderProps) {
       });
     };
 
-    // P2 fix: Throttled time updates (max 10fps instead of ~4fps native)
+    // P2 fix: Throttled time updates (limit to ~10Hz to reduce re-renders)
     const handleTimeUpdate = () => {
       if (!audioRef.current) return;
 
       const now = performance.now();
-      // Throttle to ~100ms intervals (10fps) to reduce re-renders
+      // Throttle to ~100ms intervals to reduce re-renders
       if (now - lastTimeUpdateRef.current < 100) return;
       lastTimeUpdateRef.current = now;
 
@@ -141,9 +140,6 @@ export function AudioPlayerProvider({ children }: AudioPlayerProviderProps) {
       audio.removeEventListener("error", handleError);
       audio.pause();
       audio.src = "";
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
     };
   }, []);
 
