@@ -98,7 +98,9 @@ Rules for summary:
 - Exactly 2 sentences, max 50 words total
 - Sentence 1: Specific—name the most important products, people, companies
 - Sentence 2: Thematic—the broader insight or takeaway
-- Never start with "In this chapter" or "Fraser and Nabeel discuss"
+- NEVER mention the hosts "Fraser" or "Nabeel" by name—they are implied
+- If episode has a guest, you may reference the guest name if relevant
+- Use topic-focused phrasing (e.g., "AI is transforming..." not "Fraser explains...")
 
 Rules for semanticTags (IMPORTANT):
 - 8-12 keywords that EXPAND searchability beyond the summary
@@ -220,7 +222,7 @@ const handleGenerateSummaries = async (regenerateAll = false) => {
 **Chapter: "Be Water: Notion's Everywhere Strategy"**
 
 **Summary:**
-> Nabeel discusses Notion's strategy of being omnipresent through its updated API, contrasting it with Slack's walled garden approach. The episode emphasizes the importance of adaptability and user agency in a rapidly changing technological landscape.
+> Notion's updated API enables an omnipresent strategy, contrasting with Slack's walled garden approach. Adaptability and user agency matter most in a rapidly changing technological landscape.
 
 **Semantic Tags:**
 - Notion
